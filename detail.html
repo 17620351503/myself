@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="css/mui.css" />
+  </head>
+
+  <body>
+    <div class="mui-content">
+      <h1>{{name}}--{{id}}</h1>
+      <button type="button" class="mui-btn mui-btn-blue mui-btn-block" id="btn">返回</button>
+    </div>
+    <script src="js/mui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
+    <script type="text/javascript">
+      mui.init()
+      var vm = new Vue({
+        el: '.mui-content',
+        data: {
+          name: '',
+          id: ''
+        }
+      })
+      mui.plusReady(function() {
+        vm.name = plus.webview.currentWebview().name
+        window.addEventListener('newsId',function(){
+          vm.id = event.detail.id
+        })
+        mui('.mui-content').on('tap', '#btn', handler)
+
+        function handler() {
+          mui.back()
+        }
+      })
+    </script>
+  </body>
+
+</html>

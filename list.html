@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="css/mui.css" />
+  </head>
+
+  <body>
+    <div class="mui-content">
+      <div id="refreshContainer" class="mui-content mui-scroll-wrapper">
+        <div class="mui-scroll">
+          <!--数据列表-->
+          <ul class="mui-table-view">
+            <li class="mui-table-view-cell mui-media" v-for="(item, index) in list" :key="index" :id="item.id">
+              <a href="javascript:;">
+                <img class="mui-media-object mui-pull-left" :src="item.images.small">
+                <div class="mui-media-body">
+                  {{item.title}}
+                  <p class="mui-ellipsis">{{item.original_title}}</p>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <button type="button" class="mui-btn mui-btn-blue" id="cancelBtn">按钮</button>
+      <button type="button" class="mui-btn mui-btn-blue" id="ajax">数据</button>
+      <button type="button" class="mui-btn mui-btn-blue" id="camera">拍照</button>
+      <button type="button" class="mui-btn mui-btn-blue" id="barcode">图片二维码</button>
+    </div>
+    <script src="js/mui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
+    <script type="text/javascript">
+      mui.init({
+        //      pullRefresh: {
+        //        container: "#refreshContainer", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+        //        down: {
+        //          style: 'circle', //必选，下拉刷新样式，目前支持原生5+ ‘circle’ 样式
+        //          color: '#2BD009', //可选，默认“#2BD009” 下拉刷新控件颜色
+        //          height: '50px', //可选,默认50px.下拉刷新控件的高度,
+        //          range: '100px', //可选 默认100px,控件可下拉拖拽的范围
+        //          offset: '0px', //可选 默认0px,下拉刷新控件的起始位置
+        //          auto: false, //可选,默认false.首次加载自动上拉刷新一次
+        //          callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+        //        }
+        //      },
+        preloadPages: [{
+          url: 'detail.html',
+          id: 'detail',
+          styles: {}, //窗口参数
+          extras: {
+            name: '哈哈哈'
+          }, //自定义扩展参数
+          subpages: [{}, {}] //预加载页面的子页面
+        }],
+        preloadLimit: 5, //预加载窗口数量限制(一旦超出,先进先出)默认不限制
+        pullRefresh: {
+          container: "#refreshContainer", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+          down: {
+            height: 50, //可选,默认50.触发下拉刷新拖动距离,
+            auto: true, //可选,默认false.首次加载自动下拉刷新一次
+            contentdown: "下拉可以刷新", //可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+            contentover: "释放立即刷新", //可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+            contentrefresh: "正在刷新...", //可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+            callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+          }
+        }
+      });
+
+      function pullfresh() {
+        mui('#refreshContainer').pullRefresh().endPulldown();
+      }
+      
+      var vm = new Vue({
+        el: '.mui-content',
+        data: {
+          list: []
+        }
+      })
+
+      mui.plusReady(function() {
+         mui('.mui-content').on('tap', '#ajax', function(){
+          mui.ajax('https://www.daxunxun.com/douban',{
+             success: function(data){
+               vm.list = data
+             }
+          })
+        })
+        mui('.mui-table-view').on('tap', '.mui-table-view-cell', handler)
+        mui('.mui-content').on('tap', '#cancelBtn', cancel)
+        mui('.mui-content').on('tap', '#camera', camera)
+        mui('.mui-content').on('tap', '#barcode', barcode)
+        
+       
+
+          plus.accelerometer.watchAcceleration( function ( a ) {
+            if(a.xAxis+a.yAxis+a.zAxis>50){
+              alert("x:" + a.xAxis + "\ny:" + a.yAxis + "\nz:" + a.zAxis) 
+            }
+          }, function ( e ) {
+            alert( "Acceleration error: " + e.message ); 
+          }, {frequency:1000} )
+        
+        function cancel() {
+          mui('.mui-table-view').off('tap', '.mui-table-view-cell', handler)
+        }
+        
+        function barcode() {
+          plus.barcode.scan( '1541156334.png', function (type,result) {
+                alert( "Scan success:("+type+")"+result );
+              }, function (error) {
+                alert( error.message );
+              } );
+        }
+
+        function camera() {
+          var cmr = plus.camera.getCamera();
+          var res = cmr.supportedImageResolutions[0];
+          var fmt = cmr.supportedImageFormats[0];
+          console.log("Resolution: " + res + ", Format: " + fmt);
+          cmr.captureImage(function(path) {
+              alert("Capture image success: " + path);
+            },
+            function(error) {
+              alert("Capture image failed: " + error.message);
+            }, {
+              resolution: res,
+              format: fmt
+            }
+          );
+        }
+
+        function handler() {
+          detailPage = plus.webview.getWebviewById('detail');
+          var id = this.getAttribute('id');
+          mui.fire(detailPage, 'newsId', {
+            id: id
+          });
+          mui.openWindow({
+            id: 'detail',
+            styles: {
+              titleNView: { // 窗口的标题栏控件
+                titleText: "标题栏", // 标题栏文字,当不设置此属性时，默认加载当前页面的标题，并自动更新页面的标题
+                titleColor: "#000000", // 字体颜色,颜色值格式为"#RRGGBB",默认值为"#000000"
+                titleSize: "17px", // 字体大小,默认17px
+                backgroundColor: "#F7F7F7", // 控件背景颜色,颜色值格式为"#RRGGBB",默认值为"#F7F7F7"
+                splitLine: { // 标题栏控件的底部分割线，类似borderBottom
+                  color: "#CCCCCC", // 分割线颜色,默认值为"#CCCCCC"  
+                  height: "1px" // 分割线高度,默认值为"2px"
+                }
+              }
+            },
+            extras: {},
+            createNew: false, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+            show: {
+              autoShow: true, //页面loaded事件发生后自动显示，默认为true
+            },
+            waiting: {
+              autoShow: true, //自动显示等待框，默认为true
+              title: '正在加载...', //等待对话框上显示的提示内容
+              options: {}
+            }
+          })
+        }
+      })
+    </script>
+  </body>
+
+</html>

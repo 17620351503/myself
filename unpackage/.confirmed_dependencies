@@ -1,0 +1,20 @@
+{
+  "index.html": {
+    "resources": [
+      "footer.html",
+      "top.html",
+      "list.html"
+    ],
+    "refer": [
+      "footer.html",
+      "list.html",
+      "top.html"
+    ]
+  },
+  "list.html": {
+    "refer": [
+      "footer.html",
+      "detail.html"
+    ]
+  }
+}
